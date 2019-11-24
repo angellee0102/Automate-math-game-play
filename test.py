@@ -2,24 +2,39 @@ import snp
 import glob
 import os
 import cv2
-import matplotlib.pyplot as plt
-import numpy as np
 import pyautogui
 
 images = glob.glob("pic/numbers/*.JPG")
 equal_pic= cv2.imread ("pic/equal.JPG")
 answer_box_pic=cv2.imread("pic/answer_box.JPG")
+results_pic=cv2.imread("pic/results.JPG")
 
 img_array=[]
 for img in images:
     image = cv2.imread (img)
     img_array.append (image)
 
-region_equal=(100,270,750,400)
-
+# region_full=(400,300,750,450)
+# region_equal=(600,300,450,250)
+region_full=(300,500,450,450)
+region_equal=(300,370,450,250)
+play_button = snp.locateOnScreen('pic\play_button.JPG', region=region_full)
+while play_button==None:
+    play_button = snp.locateOnScreen('pic\play_button.JPG', region=region_full)
+    p=play_button
+    if p != None:
+        pyautogui.click(p[0]+p[2]//2,p[1]+p[3]//2)
+# 重新執行
 while True:
+    
+    results=snp.locateOnScreen(results_pic,region=region_equal)
     equal = snp.locateOnScreen(equal_pic,region=region_equal)
     answer_box=snp.locateOnScreen(answer_box_pic,region=region_equal)
+    if results!=None:
+        results_resion_list=list(results)
+        results_x=results_resion_list[0]
+        results_y=results_resion_list[1]
+        pyautogui.click(results_x-210,results_y+190)
     if equal != None and answer_box!= None:
         # print('equal',equal)
         equal_list = list(equal)
@@ -40,6 +55,7 @@ while True:
         for i in range(0,10):
             # number_path='pic\\numbers\\'+str(i)+'.JPG'
             left_number_left_digit = snp.locateOnScreen(img_array[i],region=region_left_number_left,threshold=0.84)
+
             if left_number_left_digit!=None:
                 is_left_number_two_digit=True
                 left_digit=i
@@ -93,14 +109,15 @@ while True:
             # print('右邊數字:', right_number)
         
         print(left_number, middle_number, right_number)
-        # Calculation
-        if (left_number//middle_number==right_number):# 除法
-            pyautogui.click(answer_box_x+270,answer_box_y+270)
-        elif(left_number*middle_number==right_number):# 乘法
-            pyautogui.click(answer_box_x+150,answer_box_y+270)
-        elif(right_number-middle_number==left_number):# 加號
-            pyautogui.click(answer_box_x-150,answer_box_y+270)
-        else:# 減號 
-            pyautogui.click(answer_box_x,answer_box_y+270)
+        if left_number!= None and middle_number!=None and right_number!=None:
+            # Calculation
+            if(right_number-middle_number==left_number):# 加號
+                pyautogui.click(answer_box_x-150,answer_box_y+270)
+            elif(left_number*middle_number==right_number):# 乘法
+                pyautogui.click(answer_box_x+150,answer_box_y+270)
+            elif (left_number//middle_number==right_number):# 除法
+                pyautogui.click(answer_box_x+270,answer_box_y+270)
+            else:# 減號 
+                pyautogui.click(answer_box_x,answer_box_y+270)
 
 
